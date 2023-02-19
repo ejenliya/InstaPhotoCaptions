@@ -1,0 +1,72 @@
+import telebot
+from prediction import make_prediction
+
+TOKEN = '5852903834:AAECxiXtoJaEBL2WlGsN3mbHf_VSMkyztp8'
+LANGUAGE = None
+
+bot = telebot.TeleBot(TOKEN)
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    global LANGUAGE
+    LANGUAGE = None
+    bot.send_message(message.chat.id, f'Hello, {message.from_user.first_name}!\n' +
+                     '/setlanguage you prefer ' +
+                     'and write me the /text you want to place under the photo on Instagram, ' +
+                     'and I will tell you how successful it is.')
+
+@bot.message_handler(commands=['help'])
+def help_command(message):
+   markup = telebot.types.InlineKeyboardMarkup()
+   markup.add(
+       telebot.types.InlineKeyboardButton('Message the developer', url='telegram.me/ejenliya')
+   )
+   bot.send_message(
+       message.chat.id,
+       '/start to start the bot\n\n' +
+       '/setlanguage to select language\n' +
+       '/text to write and check your photo caption\n',
+       reply_markup=markup
+   )
+
+@bot.message_handler(commands=['setlanguage'])
+def set_language(message):
+    markup = telebot.types.InlineKeyboardMarkup()
+    item1 = telebot.types.InlineKeyboardButton('RUS', callback_data='RUS')
+    item2 = telebot.types.InlineKeyboardButton('EN', callback_data='EN')
+    markup.add(item1, item2)
+    bot.send_message(message.chat.id, 'Choose the language you prefer to write caption in:', reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback(query):
+   if query.message:
+        global LANGUAGE
+        LANGUAGE = query.data
+        if LANGUAGE == 'RUS':
+            bot.send_message(query.message.chat.id, 'Отлично!')
+        elif LANGUAGE == 'EN':
+            bot.send_message(query.message.chat.id, 'Sorry, this language is not supporting yet :(')
+
+@bot.message_handler(commands=['text'])
+def text(message):
+    if LANGUAGE:
+        if LANGUAGE == 'RUS':
+            bot.send_message(message.chat.id, 'Напиши мне свой текст:')
+            bot.register_next_step_handler(message, get_user_text)
+        elif LANGUAGE == 'EN':
+            bot.send_message(message.chat.id, 'Sorry, this language is not supporting yet :(')
+    else:
+        bot.send_message(message.chat.id, 'Please select the language before!')
+        set_language(message)
+
+def get_user_text(message):
+    caption = message.text
+    pred = make_prediction(caption)[0]
+    if pred[0] == max(pred[0], pred[1]):
+        bot.send_message(message.chat.id, f'Пост с таким описанием не наребет популярность с вероятностью {round(pred[0]*100, 2)}%. Попробуй ещё раз!')
+    else:
+        bot.send_message(message.chat.id, f'Неплохо! \nС вероятностью {round(pred[1]*100, 2)}% аудитории такое понравится. Но можешь попробовать улучшить описание!')
+
+
+
+bot.polling(non_stop=True)

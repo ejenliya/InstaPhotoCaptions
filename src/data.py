@@ -17,7 +17,7 @@ data['text'] = data['text'].apply(drop_superfuluos)
 
 tf_idf_vec = TfidfVectorizer(use_idf=True,  
                         smooth_idf=True,  
-                        ngram_range=(1,1),stop_words='english')
+                        ngram_range=(1,1),stop_words='english') #ENGLISH??
 tf_idf_data = tf_idf_vec.fit_transform(data['text']) 
 tf_idf_frame = pd.DataFrame(tf_idf_data.toarray(), columns=tf_idf_vec.get_feature_names_out())
 
