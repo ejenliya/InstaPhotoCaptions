@@ -23,8 +23,8 @@ def help_command(message):
    )
    bot.send_message(
        message.chat.id,
-       '/start to start the bot\n\n' +
-       '/setlanguage to select language\n' +
+       '/start to start and reset the bot\n\n' +
+       '/setlanguage to select language you prefer\n' +
        '/text to write and check your photo caption\n',
        reply_markup=markup
    )
@@ -35,7 +35,10 @@ def set_language(message):
     item1 = telebot.types.InlineKeyboardButton('RUS', callback_data='RUS')
     item2 = telebot.types.InlineKeyboardButton('EN', callback_data='EN')
     markup.add(item1, item2)
-    bot.send_message(message.chat.id, 'Choose the language you prefer to write caption in:', reply_markup=markup)
+    if not LANGUAGE or LANGUAGE == 'EN':
+        bot.send_message(message.chat.id, 'Choose the language you prefer to write caption in:', reply_markup=markup)
+    elif LANGUAGE == 'RUS':
+        bot.send_message(message.chat.id, 'Выбери язык, на котором хочешь написать текст:', reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(query):
@@ -52,21 +55,21 @@ def text(message):
     if LANGUAGE:
         if LANGUAGE == 'RUS':
             bot.send_message(message.chat.id, 'Напиши мне свой текст:')
-            bot.register_next_step_handler(message, get_user_text)
+            bot.register_next_step_handler(message, get_user_text_rus)
         elif LANGUAGE == 'EN':
             bot.send_message(message.chat.id, 'Sorry, this language is not supporting yet :(')
     else:
         bot.send_message(message.chat.id, 'Please select the language before!')
         set_language(message)
 
-def get_user_text(message):
+def get_user_text_rus(message):
     caption = message.text
     pred = make_prediction(caption)[0]
+
     if pred[0] == max(pred[0], pred[1]):
         bot.send_message(message.chat.id, f'Пост с таким описанием не наребет популярность с вероятностью {round(pred[0]*100, 2)}%. Попробуй ещё раз!')
     else:
-        bot.send_message(message.chat.id, f'Неплохо! \nС вероятностью {round(pred[1]*100, 2)}% аудитории такое понравится. Но можешь попробовать улучшить описание!')
-
+        bot.send_message(message.chat.id, f'Неплохо! \nС вероятностью {round(pred[1]*100, 2)}% аудитории такое понравится. Попробуй ещё раз!')
 
 
 bot.polling(non_stop=True)

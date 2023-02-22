@@ -97,3 +97,14 @@ def create_words_embs(w2v_model, frame):
         
     words_embs = words_embs.reset_index().drop(columns=['index'])
     return words_embs
+
+def w2v_tfidf_keys(w2v, tf_idf_frame):
+    keys = []
+    for col in tf_idf_frame.columns:
+        try:
+            w2v.wv[col]
+            keys.append(col)
+        except Exception as ex:
+            print(ex)
+            continue
+    return keys

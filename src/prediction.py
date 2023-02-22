@@ -4,15 +4,6 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from preprocessing import *
 
-'''#for example to check
-test_data = pd.read_csv('/home/ejenliya/Projects/FotoCaptions/data/data.csv')
-test_data = test_data[test_data['likes'] != 'другим']
-test_data = test_data.dropna().iloc[:10]
-test_data = test_data['text']
-
-print(type(test_data))'''
-
-#test_data = 'текст о погоде и хорошем настроении'
 
 def make_prediction(text):
     test_data = pd.DataFrame(data={'text': [text]})
@@ -42,5 +33,3 @@ def make_prediction(text):
 
     return preds
 
-'''predictions = make_prediction(test_data)
-print(predictions)'''
