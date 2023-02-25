@@ -2,12 +2,18 @@ import pandas as pd
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from xgboost import XGBClassifier
+#from sklearn.svm import SVC
+#from xgboost import XGBClassifier
 from imblearn.over_sampling import ADASYN
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import joblib
+import yaml
+
+with open('../FotoCaptions/config/config.yaml') as f:
+    temps = yaml.safe_load(f)
+random_forest, xgboost, svm = temps['random_forest'], temps['xgboost'], temps['svm']
+
 
 train_data = pd.read_csv('../FotoCaptions/data/prepared_data.csv')
 train_data.info()
@@ -26,14 +32,14 @@ X_train, X_valid, y_train, y_valid = train_test_split(train_data_rsmpld, target_
 
 
 '''xgb = XGBClassifier()
-xgb_params = {'n_estimators': np.arange(100, 301, 50),
-         'max_depth': np.arange(2, 6)}
+xgb_params = {'n_estimators': np.arange(xgboost['min_estimators'], xgboost['max_estimators'], xgboost['estimators_step']),
+         'max_depth': np.arange(xgboost.min_depth, xgboost.max_depth)}
 
 xgb_grid = GridSearchCV(xgb, xgb_params, cv=5, scoring='precision', n_jobs=-1)
-xgb_grid.fit(X_train[feature_importances[:300].index], y_train)
+xgb_grid.fit(X_train[feature_importances[:xgboost['num_features']].index], y_train)
 
 best_xgb = xgb_grid.best_estimator_
-preds = best_xgb.predict(X_valid[feature_importances[:300].index])
+preds = best_xgb.predict(X_valid[feature_importances[:xgboost['num_features']].index])
 print('XGB Accuracy: ', accuracy_score(y_valid, preds))
 print('XGB Precision: ', precision_score(y_valid, preds))
 print('XGB Recall: ', recall_score(y_valid, preds))
@@ -43,14 +49,14 @@ joblib.dump(best_xgb, '../FotoCaptions/models/xgboost_clf.pkl')'''
 
 
 rf = RandomForestClassifier()
-rf_params = {'n_estimators': np.arange(100, 301, 50),
-        'max_depth': np.arange(20, 81, 10)}
+rf_params = {'n_estimators': np.arange(random_forest['min_estimators'], random_forest['max_estimators'], random_forest['estimators_step']),
+          'max_depth': np.arange(random_forest['min_depth'], random_forest['max_depth'], random_forest['depth_step'])}
 
 rf_grid = GridSearchCV(rf, rf_params, cv=5, scoring='precision', n_jobs=-1)
-rf_grid.fit(X_train[feature_importances[:300].index], y_train)
+rf_grid.fit(X_train[feature_importances[:random_forest['num_features']].index], y_train) #
 
 best_rf = rf_grid.best_estimator_
-preds = best_rf.predict(X_valid[feature_importances[:300].index])
+preds = best_rf.predict(X_valid[feature_importances[:random_forest['num_features']].index])
 print('RF Accuracy: ', accuracy_score(y_valid, preds))
 print('RF Precision: ', precision_score(y_valid, preds))
 print('RF Recall: ', recall_score(y_valid, preds))
@@ -60,14 +66,14 @@ joblib.dump(best_rf, '../FotoCaptions/models/random_forest_clf.pkl')
 
 
 '''svc = SVC()
-svc_params = {'C': np.arange(0.5, 12.5, 0.5),
-         'kernel': ['poly', 'rbf']}
+svc_params = {'C': np.arange(svm['min_C'], svm['max_C'], svm['C_step']),
+         'kernel': svm['kernel']}
 
 svc_grid = GridSearchCV(svc, svc_params, cv=5, scoring='precision', n_jobs=-1)
-svc_grid.fit(X_train[feature_importances[:60].index], y_train)
+svc_grid.fit(X_train[feature_importances[:svm['num_features']].index], y_train)
 
 best_svc = svc_grid.best_estimator_
-preds = best_svc.predict(X_valid[feature_importances[:60].index])
+preds = best_svc.predict(X_valid[feature_importances[:svm['num_features']].index])
 print('SVC Accuracy: ', accuracy_score(y_valid, preds))
 print('SVC Precision: ', precision_score(y_valid, preds))
 print('SVC Recall: ', recall_score(y_valid, preds))

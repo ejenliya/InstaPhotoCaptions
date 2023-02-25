@@ -26,7 +26,7 @@ def filter_num(str):
 
     try:
         num = int(new_str)
-    except Exception as ex:
+    except Exception:
         num = 1
 
     return num
@@ -44,7 +44,7 @@ def date_diff(str):
         res.reverse()
         try:
             res[1], res[2] = month_rus[res[2]], res[1][0:-1]
-        except Exception as ex:
+        except Exception:
             res = ['2023', month_rus[res[1]], res[0]]
 
         today = datetime.today()
@@ -91,8 +91,7 @@ def create_words_embs(w2v_model, frame):
         try:
             emb = w2v_model.wv[col].tolist()
             words_embs.loc[i] = [col] + emb
-        except Exception as ex:
-            print(ex)
+        except Exception:
             continue
         
     words_embs = words_embs.reset_index().drop(columns=['index'])
@@ -104,7 +103,6 @@ def w2v_tfidf_keys(w2v, tf_idf_frame):
         try:
             w2v.wv[col]
             keys.append(col)
-        except Exception as ex:
-            print(ex)
+        except Exception:
             continue
     return keys

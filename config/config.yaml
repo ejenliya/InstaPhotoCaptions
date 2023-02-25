@@ -1,0 +1,24 @@
+token: 'your_token'
+random_forest:
+  min_estimators: 200
+  max_estimators: 301
+  estimators_step: 50
+  min_depth: 100
+  max_depth: 201
+  depth_step: 10
+  num_features: 700
+xgboost:
+  min_estimators: 100
+  max_estimators: 301
+  estimators_step: 50
+  min_depth: 2
+  max_depth: 6
+  num_features: 700
+svm:
+  min_C: 0.5
+  max_C: 12.5
+  C_step: 0.5
+  kernel:
+   - 'poly'
+   - 'rbf'
+  num_features: 700

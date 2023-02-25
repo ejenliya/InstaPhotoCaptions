@@ -1,8 +1,8 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-#at once
-import nltk
-nltk.download("stopwords")
+#once
+'''import nltk
+nltk.download("stopwords")'''
 
 from nltk.corpus import stopwords
 from gensim.models import Word2Vec
@@ -19,8 +19,10 @@ data = data.reset_index().drop(columns=['index'])
 
 data = data[data['likes'] < 5000]
 data = data[data['time'] <= data['time'].mean()]
+
 data['likes_per_day'] = ((1440 * data['likes']) / (data['time'])).astype(int)
 data = data[data['likes_per_day'] < 25000]
+
 data['popularity'] = (data['likes_per_day'] > data['likes_per_day'].quantile(q=0.75)).astype(int)
 data = data.reset_index().drop(columns=['index'])
 

@@ -1,8 +1,13 @@
 import telebot
 from prediction import make_prediction
+import yaml
 
-TOKEN = '5852903834:AAECxiXtoJaEBL2WlGsN3mbHf_VSMkyztp8'
+with open('../FotoCaptions/config/config.yaml') as f:
+    temps = yaml.safe_load(f)
+
+TOKEN = temps['token']
 LANGUAGE = None
+
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -64,12 +69,18 @@ def text(message):
 
 def get_user_text_rus(message):
     caption = message.text
-    pred = make_prediction(caption)[0]
 
-    if pred[0] == max(pred[0], pred[1]):
-        bot.send_message(message.chat.id, f'Пост с таким описанием не наребет популярность с вероятностью {round(pred[0]*100, 2)}%. Попробуй ещё раз!')
-    else:
-        bot.send_message(message.chat.id, f'Неплохо! \nС вероятностью {round(pred[1]*100, 2)}% аудитории такое понравится. Попробуй ещё раз!')
-
+    try:
+        pred = make_prediction(caption)[0]
+    except ValueError:
+        bot.send_message(message.chat.id, 'Здесь нет слов. Дай мне слова!')
+    else: 
+        try:
+            if pred[0] > 0.4 and pred[0] < 0.6:
+                bot.send_message(message.chat.id, 'Не уверен...')
+        except TypeError:
+            bot.send_message(message.chat.id, 'Здесь нет слов, которые влияют на популярность. Попробуй ещё!')
+        else:
+            bot.send_message(message.chat.id, f'Пост наберет популярность с вероятностью {round(pred[1]*100, 2)}%. Попробуй ещё раз!')
 
 bot.polling(non_stop=True)
