@@ -1,3 +1,8 @@
+'''
+This bot analyzes the texts in the captions of Instagram posts
+and their impact on the popularity of publications.
+'''
+
 import telebot
 from prediction import make_prediction
 import yaml
